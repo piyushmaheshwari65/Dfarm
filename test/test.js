@@ -20,10 +20,6 @@ contract('Dfarm', ([deployer, author, tipper]) => {
       assert.notEqual(address, undefined)
     })
 
-    it('has a name', async () => {
-      const name = await dfarm.name()
-      assert.equal(name, 'Dfarm')
-    })
   })
 
   describe('images', async () => {
