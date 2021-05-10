@@ -1,25 +1,29 @@
-const Dfarm = artifacts.require('./Dfarm.sol')
+const Decentragram = artifacts.require('./Decentragram.sol')
 
 require('chai')
   .use(require('chai-as-promised'))
   .should()
 
-contract('Dfarm', ([deployer, author, tipper]) => {
-  let dfarm
+contract('Decentragram', ([deployer, author, tipper]) => {
+  let decentragram
 
   before(async () => {
-    dfarm = await Dfarm.deployed()
+    decentragram = await Decentragram.deployed()
   })
 
   describe('deployment', async () => {
     it('deploys successfully', async () => {
-      const address = await dfarm.address
+      const address = await decentragram.address
       assert.notEqual(address, 0x0)
       assert.notEqual(address, '')
       assert.notEqual(address, null)
       assert.notEqual(address, undefined)
     })
 
+    it('has a name', async () => {
+      const name = await decentragram.name()
+      assert.equal(name, 'Decentragram')
+    })
   })
 
   describe('images', async () => {
@@ -27,8 +31,8 @@ contract('Dfarm', ([deployer, author, tipper]) => {
     const hash = 'QmV8cfu6n4NT5xRr2AHdKxFMTZEJrA44qgrBCr739BN9Wb'
 
     before(async () => {
-      result = await dfarm.uploadImage(hash, 'Image description', { from: author })
-      imageCount = await dfarm.imageCount()
+      result = await decentragram.uploadImage(hash, 'Image description', { from: author })
+      imageCount = await decentragram.imageCount()
     })
 
     //check event
@@ -44,15 +48,15 @@ contract('Dfarm', ([deployer, author, tipper]) => {
 
 
       // FAILURE: Image must have hash
-      await dfarm.uploadImage('', 'Image description', { from: author }).should.be.rejected;
+      await decentragram.uploadImage('', 'Image description', { from: author }).should.be.rejected;
 
       // FAILURE: Image must have description
-      await dfarm.uploadImage('Image hash', '', { from: author }).should.be.rejected;
+      await decentragram.uploadImage('Image hash', '', { from: author }).should.be.rejected;
     })
 
     //check from Struct
     it('lists images', async () => {
-      const image = await dfarm.images(imageCount)
+      const image = await decentragram.images(imageCount)
       assert.equal(image.id.toNumber(), imageCount.toNumber(), 'id is correct')
       assert.equal(image.hash, hash, 'Hash is correct')
       assert.equal(image.description, 'Image description', 'description is correct')
@@ -66,7 +70,7 @@ contract('Dfarm', ([deployer, author, tipper]) => {
       oldAuthorBalance = await web3.eth.getBalance(author)
       oldAuthorBalance = new web3.utils.BN(oldAuthorBalance)
 
-      result = await dfarm.tipImageOwner(imageCount, { from: tipper, value: web3.utils.toWei('1', 'Ether') })
+      result = await decentragram.tipImageOwner(imageCount, { from: tipper, value: web3.utils.toWei('1', 'Ether') })
 
       // SUCCESS
       const event = result.logs[0].args
@@ -90,7 +94,7 @@ contract('Dfarm', ([deployer, author, tipper]) => {
       assert.equal(newAuthorBalance.toString(), expectedBalance.toString())
 
       // FAILURE: Tries to tip a image that does not exist
-      await dfarm.tipImageOwner(99, { from: tipper, value: web3.utils.toWei('1', 'Ether')}).should.be.rejected;
+      await decentragram.tipImageOwner(99, { from: tipper, value: web3.utils.toWei('1', 'Ether')}).should.be.rejected;
     })
   })
 })
